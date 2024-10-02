@@ -1,5 +1,6 @@
 use color_eyre::Result;
 use ratatui::{prelude::*, widgets::*};
+use text::ToText;
 use tokio::sync::mpsc::UnboundedSender;
 
 use super::Component;
@@ -9,6 +10,7 @@ use crate::{action::Action, config::Config};
 pub struct Home {
     command_tx: Option<UnboundedSender<Action>>,
     config: Config,
+    text: String,
 }
 
 impl Home {
@@ -28,21 +30,31 @@ impl Component for Home {
         Ok(())
     }
 
+    fn handle_key_event(&mut self, key: crossterm::event::KeyEvent) -> Result<Option<Action>> {
+
+        self.text.push_str(key.code.to_text().to_string().as_str());
+
+        Ok(None)
+    }
+
     fn update(&mut self, action: Action) -> Result<Option<Action>> {
         match action {
             Action::Tick => {
+                // we want to filter out the key presses here
                 // add any logic here that should run on every tick
             }
             Action::Render => {
                 // add any logic here that should run on every render
             }
+
+
             _ => {}
         }
         Ok(None)
     }
 
     fn draw(&mut self, frame: &mut Frame, area: Rect) -> Result<()> {
-        frame.render_widget(Paragraph::new("hello world"), area);
+        frame.render_widget(Paragraph::new(self.text.clone()), area);
         Ok(())
     }
 }

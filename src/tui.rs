@@ -64,7 +64,9 @@ impl Tui {
             event_rx,
             event_tx,
             frame_rate: 60.0,
-            tick_rate: 4.0,
+            // we want a relatively high tick rate inside so we can capture peoples keyboard
+            // presses
+            tick_rate: 400.0,
             mouse: false,
             paste: false,
         })

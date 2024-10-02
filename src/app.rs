@@ -25,6 +25,7 @@ pub struct App {
     action_rx: mpsc::UnboundedReceiver<Action>,
 }
 
+// this mode isnt really mode, its more like what screen we are on,
 #[derive(Default, Debug, Copy, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub enum Mode {
     #[default]
@@ -107,6 +108,7 @@ impl App {
 
     fn handle_key_event(&mut self, key: KeyEvent) -> Result<()> {
         let action_tx = self.action_tx.clone();
+
         let Some(keymap) = self.config.keybindings.get(&self.mode) else {
             return Ok(());
         };
