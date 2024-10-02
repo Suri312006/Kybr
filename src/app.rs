@@ -1,5 +1,5 @@
 use color_eyre::Result;
-use crossterm::event::KeyEvent;
+use crossterm::event::{KeyCode, KeyEvent};
 use ratatui::prelude::Rect;
 use serde::{Deserialize, Serialize};
 use tokio::sync::mpsc;
@@ -23,6 +23,7 @@ pub struct App {
     last_tick_key_events: Vec<KeyEvent>,
     action_tx: mpsc::UnboundedSender<Action>,
     action_rx: mpsc::UnboundedReceiver<Action>,
+    keylock: bool,
 }
 
 // this mode isnt really mode, its more like what screen we are on,
@@ -46,6 +47,7 @@ impl App {
             last_tick_key_events: Vec::new(),
             action_tx,
             action_rx,
+            keylock: false,
         })
     }
 
@@ -95,7 +97,17 @@ impl App {
             Event::Tick => action_tx.send(Action::Tick)?,
             Event::Render => action_tx.send(Action::Render)?,
             Event::Resize(x, y) => action_tx.send(Action::Resize(x, y))?,
-            Event::Key(key) => self.handle_key_event(key)?,
+            Event::Key(key) => {
+                // we need some specific combination to exit this keylock
+                // lets use enter
+                if key.code == KeyCode::Enter {
+                    self.keylock = !self.keylock
+                }
+
+                if !self.keylock {
+                    self.handle_key_event(key)?
+                }
+            }
             _ => {}
         }
         for component in self.components.iter_mut() {
